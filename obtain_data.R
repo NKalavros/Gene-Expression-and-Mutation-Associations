@@ -86,7 +86,7 @@ length <- lapply(length, length)
 length <- (unlist(length))
 mutationmatrix <- mutationmatrix[length > mutatednumber,]
 
-mutationmatrix$Tumor_Sample_Barcode <- lapply(mutationmatrix$Tumor_Sample_Barcode,substring,1,16)
+mutationmatrix$Tumor_Sample_Barcode <- lapply(mutationmatrix$Tumor_Sample_Barcode,substring,1,15)
 
 rna <- fread("/home/nikolas/stravopodis/Bladder Cancer/TCGA-BLCA_mRNA_FPKM_countmatrix.tsv")
 
@@ -103,8 +103,8 @@ rna <- rna[,normals]
 rownames(rna) <- rownames
 
 rownames(rna) <- substring(rownames(rna),0,15)
-
-colnames(rna) <- substring(colnames(rna),1,16)
+colnames(rna)
+colnames(rna) <- substring(colnames(rna),1,15)
 
 colnames(rna) <- make.unique(colnames(rna))
 
@@ -123,24 +123,18 @@ queriedgenes <- subset(G_list,
 ###TESTO
 n <- 1
 gene <- mutationmatrix[n,1]
-samples <- make.names(unlist(mutationmatrix[n,2]))
+samples <- unique(make.names(unlist(mutationmatrix[n,2])))
 
 j <- 1
 queriedgene <- queriedgenes[j,1]
 queriedgene
-duplicated(samples)
 
 data <- rna[queriedgene,]
 
-dim(data)
-
 mutated <- as.numeric(data[samples])
 
-setdiff(colnames(data),samples)
+nonmutated <- as.numeric(data[, -which(colnames(data) %in% samples)])
 
-nonmutated <- data[, -which(colnames(data) %in% samples)]
-
-union(samples,colnames(data))
-
-nonmutated <- as.numeric(data[nonmutated])
-colnames(data)[duplicated(colnames(data))]
+ttest <- t.test(mutated,nonmutated)
+ttest$estimate
+ttest$p.value
